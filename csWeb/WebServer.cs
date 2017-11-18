@@ -29,10 +29,11 @@ namespace csWeb
 
         public async void Run()
         {
+            Router router = new Router();
+
             while (true)
             {
                 HttpListenerContext context = await mlistener.GetContextAsync();
-                Router router = new Router(context);
 
                 router.ActivateController(context);
 

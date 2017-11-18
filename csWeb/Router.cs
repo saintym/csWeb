@@ -6,6 +6,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 
 namespace csWeb
 {
@@ -15,12 +16,6 @@ namespace csWeb
         private object mController;
         private Type mControllerType;
 
-
-        public Router(HttpListenerContext httpListenerContext)
-        {
-            url = httpListenerContext.Request.RawUrl;
-            //mhttpListener = httpListenerContext;
-        }
 
         public string url
         {
@@ -43,34 +38,72 @@ namespace csWeb
 
         public void ActivateController(HttpListenerContext context)
         {
-            controllerType = Type.GetType("csWeb" + GetControllerNameInternal()); // WebServer.Controller.protected
+            Ctrl ctrl = new Ctrl();
+            url = context.Request.RawUrl;
 
+            //controllerType = Type.GetType("csWeb" + GetControllerNameInternal()); // csWeb.Controller.protected
+
+
+            MethodInfo[] methodInfos = typeof(Ctrl).GetMethods();
+
+            foreach (MethodInfo methodInfo in methodInfos)
+            {
+                RouteAttribute[] routeAttributes = methodInfo.GetCustomAttributes<RouteAttribute>().ToArray();
+
+                foreach (var attribute in routeAttributes)
+                {
+                    RouteAttribute path = (RouteAttribute)attribute;
+
+                    if (path != null)
+                        if (path.controllerPath.Equals(url))
+                        {
+                            methodInfo.Invoke(ctrl, new object[] { context });
+                            return;
+                        }
+                }
+            }
+
+            ctrl.ErrorPage(context);
+
+            /*
+            var routeAttributes = controllerType.GetMethods().Select(info => info.GetCustomAttribute<RouteAttribute>());
+            var test = controllerType.GetMethods().Select(info => Tuple.Create(info, info.GetCustomAttributes<RouteAttribute>()));
+            */
+
+            /*
             try
             {
                 controller = Activator.CreateInstance(controllerType, context); //CreateInstance(controllerType);
             }
             catch (ArgumentNullException)
             {
-                controller = Activator.CreateInstance(Type.GetType("csWeb.Controller.ErrorPage"), context);
+                controller = Activator.CreateInstance(Type.GetType("csWeb.ErrorPage"), context);
             }
+            */
         }
 
-
+        /*
         private string GetControllerNameInternal()
         {
             if (url == "/")
                 return ".Controller.Home";
 
-            string[] splitedURL = ("Controller" + url).Split('/');
-
-            string controllerName = null;
-            foreach (string url in splitedURL)
-            {
-                controllerName += "." + url;
-            }
+            string controllerName = (".Controller" + url).Replace('/', '.');
+            
 
             return controllerName;
         }
+        */
 
+        private string GetControllerNameInternal()
+        {
+            if (url == "/")
+                return ".Home";
+
+            string controllerName = url.Replace('/', '.');
+
+
+            return controllerName;
+        }
     }
 }
