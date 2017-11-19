@@ -39,62 +39,59 @@ namespace csWeb
         public void ActivateController(HttpListenerContext context)
         {
             Ctrl ctrl = new Ctrl();
-            url = context.Request.RawUrl;
+            Dictionary<string, string> queries = new Dictionary<string, string>();
+            object[] routerParameter;
 
-            //controllerType = Type.GetType("csWeb" + GetControllerNameInternal()); // csWeb.Controller.protected
+            string[] notSplitedURL = context.Request.RawUrl.Split('?');
 
+            this.url = notSplitedURL[0];
+
+            if (notSplitedURL.Length > 1)
+            {
+                string query = notSplitedURL[1];
+                queries = GetDictionary(query);
+            }
+            
 
             MethodInfo[] methodInfos = typeof(Ctrl).GetMethods();
-
             foreach (MethodInfo methodInfo in methodInfos)
             {
                 RouteAttribute[] routeAttributes = methodInfo.GetCustomAttributes<RouteAttribute>().ToArray();
-
                 foreach (var attribute in routeAttributes)
                 {
                     RouteAttribute path = (RouteAttribute)attribute;
-
                     if (path != null)
-                        if (path.controllerPath.Equals(url))
+                    {
+                        if (path?.controllerPath == url)
                         {
-                            methodInfo.Invoke(ctrl, new object[] { context });
+                            methodInfo.Invoke(ctrl, routerParameter);
                             return;
                         }
+                    }
                 }
             }
-
             ctrl.ErrorPage(context);
 
             /*
             var routeAttributes = controllerType.GetMethods().Select(info => info.GetCustomAttribute<RouteAttribute>());
             var test = controllerType.GetMethods().Select(info => Tuple.Create(info, info.GetCustomAttributes<RouteAttribute>()));
             */
-
-            /*
-            try
-            {
-                controller = Activator.CreateInstance(controllerType, context); //CreateInstance(controllerType);
-            }
-            catch (ArgumentNullException)
-            {
-                controller = Activator.CreateInstance(Type.GetType("csWeb.ErrorPage"), context);
-            }
-            */
         }
 
-        /*
-        private string GetControllerNameInternal()
+        private Dictionary<string, string> GetDictionary(string urlQuery)
         {
-            if (url == "/")
-                return ".Controller.Home";
+            Dictionary<string, string> dictionary = new Dictionary<string, string>();
+            string[] splitedUrl = urlQuery.Split('&');
 
-            string controllerName = (".Controller" + url).Replace('/', '.');
-            
+            foreach (string KeyValue in splitedUrl)
+            {
+                string[] key_value = KeyValue.Split('=');
+                dictionary.Add(key_value[0], key_value[1]);
+            }
 
-            return controllerName;
+            return dictionary;
         }
-        */
-
+        
         private string GetControllerNameInternal()
         {
             if (url == "/")

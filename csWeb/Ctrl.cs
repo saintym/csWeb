@@ -11,6 +11,7 @@ namespace csWeb
 
     class Ctrl
     {
+
         [Route("/")]
         [Route("/home")]
         public void Home(HttpListenerContext context)
@@ -26,6 +27,20 @@ namespace csWeb
         {
             using (StreamWriter writer = new StreamWriter(context.Response.OutputStream))
                 writer.WriteAsync("Stop!");
+        }
+
+
+        [Route("/board")]
+        public void Board(HttpListenerContext context, Dictionary<string, string> queries)
+        {
+            using (StreamWriter writer = new StreamWriter(context.Response.OutputStream))
+            {
+                foreach (KeyValuePair<string, string> kv in queries)
+                {
+                    //Console.WriteLine("Key : {0}, Value : {1}", kv.Key, kv.Value);
+                    writer.WriteAsync($"Key : {kv.Key} , Value : {kv.Value}\n");
+                }
+            }
         }
 
 
