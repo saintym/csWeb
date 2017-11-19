@@ -37,7 +37,18 @@ namespace csWeb
             {
                 foreach (KeyValuePair<string, string> kv in queries)
                 {
-                    //Console.WriteLine("Key : {0}, Value : {1}", kv.Key, kv.Value);
+                    writer.WriteAsync($"Key : {kv.Key} , Value : {kv.Value}\n");
+                }
+            }
+        }
+
+        [Route("/member/{id}")]
+        public void Member(HttpListenerContext context, Dictionary<string, string> paths)
+        {
+            using (StreamWriter writer = new StreamWriter(context.Response.OutputStream))
+            {
+                foreach (KeyValuePair<string, string> kv in paths)
+                {
                     writer.WriteAsync($"Key : {kv.Key} , Value : {kv.Value}\n");
                 }
             }

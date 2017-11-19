@@ -50,8 +50,11 @@ namespace csWeb
             {
                 string query = notSplitedURL[1];
                 queries = GetDictionary(query);
+                routerParameter = new object[] { context, queries };
             }
-            
+            else
+                routerParameter = new object[] { context };
+
 
             MethodInfo[] methodInfos = typeof(Ctrl).GetMethods();
             foreach (MethodInfo methodInfo in methodInfos)
@@ -91,7 +94,7 @@ namespace csWeb
 
             return dictionary;
         }
-        
+
         private string GetControllerNameInternal()
         {
             if (url == "/")
