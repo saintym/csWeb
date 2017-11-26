@@ -8,22 +8,29 @@ using System.IO;
 
 namespace csWeb
 {
-
+    [Controller("/home")]
     class Ctrl
     {
+        private HttpListenerContext context;
+
+
+        public Ctrl(HttpListenerContext context)
+        {
+            this.context = context;
+        }
+
 
         [Route("/")]
         [Route("/home")]
-        public void Home(HttpListenerContext context)
+        public void Home()
         {
             using (StreamWriter writer = new StreamWriter(context.Response.OutputStream))
                 writer.WriteAsync("This place is Home~");
         }
 
 
-
         [Route("/dashboard")]
-        public void Dashboard(HttpListenerContext context)
+        public void Dashboard()
         {
             using (StreamWriter writer = new StreamWriter(context.Response.OutputStream))
                 writer.WriteAsync("Stop!");
@@ -31,7 +38,7 @@ namespace csWeb
 
 
         [Route("/board")]
-        public void Board(HttpListenerContext context, Dictionary<string, string> queries)
+        public void Board(Dictionary<string, string> queries)
         {
             using (StreamWriter writer = new StreamWriter(context.Response.OutputStream))
             {
@@ -42,8 +49,9 @@ namespace csWeb
             }
         }
 
+
         [Route("/member/{id}")]
-        public void Member(HttpListenerContext context, Dictionary<string, string> paths)
+        public void Member(Dictionary<string, string> paths)
         {
             using (StreamWriter writer = new StreamWriter(context.Response.OutputStream))
             {
@@ -51,17 +59,18 @@ namespace csWeb
                 {
                     writer.WriteAsync($"Key : {kv.Key} , Value : {kv.Value}\n");
                 }
+                //writer.WriteAsync("Member, Huhh?");
             }
         }
-
-
+        
 
         [Route("/ErrorPage")]
-        public void ErrorPage(HttpListenerContext context)
+        public void ErrorPage()
         {
             using (StreamWriter writer = new StreamWriter(context.Response.OutputStream))
                 writer.WriteAsync("Freaking Error Man");
         }
+
 
     }
 }

@@ -6,21 +6,19 @@ using System.Threading.Tasks;
 
 namespace csWeb
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    class RouteAttribute : Attribute
+    class ControllerAttribute : Attribute
     {
-
         private string mControllerPath = null;
 
-        public string controllerPath
+        public string ControllerPath
         {
             get { return mControllerPath; }
             set { mControllerPath = value; }
         }
 
-        public RouteAttribute(string path)
+        public ControllerAttribute(string path)
         {
-            mControllerPath = path;
+            ControllerPath = path;
         }
     }
 }
