@@ -42,7 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Leaf.cs" />
+    <Compile Include="Node.cs" />
     <Compile Include="Tree.cs" />
     <Compile Include="ControllerAttribute.cs" />
     <Compile Include="Controller\ErrorPage.cs" />

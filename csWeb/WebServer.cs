@@ -30,7 +30,7 @@ namespace csWeb
         public async void Run()
         {
             Router router = new Router();
-
+            router.AddController();
             while (true)
             {
                 HttpListenerContext context = await mlistener.GetContextAsync();

@@ -15,7 +15,13 @@ namespace csWeb
         private string mURL;
         private object mController;
         private Type mControllerType;
+        private PathTree mPathTree;
+        private Ctrl ctrl;
 
+        public Router()
+        {
+            mPathTree = new PathTree();
+        }
 
         public string url
         {
@@ -35,10 +41,25 @@ namespace csWeb
             set { mControllerType = value; }
         }
 
+        public void AddController()
+        {
+            //ctrl.Context = context;
+
+            MethodInfo[] methodInfos = typeof(Ctrl).GetMethods();
+            foreach (MethodInfo methodInfo in methodInfos)
+            {
+                RouteAttribute[] routeAttributes = methodInfo.GetCustomAttributes<RouteAttribute>().ToArray();
+                foreach (var attribute in routeAttributes)
+                {
+                    RouteAttribute path = (RouteAttribute)attribute;
+                    mPathTree.Add(path.SubControllerPath);
+                }
+            }
+        }
 
         public void ActivateController(HttpListenerContext context)
         {
-            Ctrl ctrl = new Ctrl(context);
+            ctrl.Context = context;
             Dictionary<string, string> queries = new Dictionary<string, string>();
             object[] routerParameter;
             string[] notSplitedURL = context.Request.RawUrl.Split('?');
@@ -68,6 +89,7 @@ namespace csWeb
                     }
                 }
             }
+
             ctrl.ErrorPage();
 
             /*
@@ -131,5 +153,7 @@ namespace csWeb
 
             return controllerName;
         }
+
+
     }
 }

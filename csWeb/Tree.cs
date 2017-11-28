@@ -6,48 +6,141 @@ using System.Threading.Tasks;
 
 namespace csWeb
 {
-    class Tree
+    class PathTree
     {
-        private Leaf mLeaf;
-        //private Dictionary<string, string> mkeyValue;
+        private List<Node> Roots { get; set; }
 
-        public Leaf Leaf
+        public PathTree()
         {
-            get { return mLeaf; }
-            set { mLeaf = value; }
+            Roots = new List<Node>();
         }
 
-        public Tree()
+        public void Add(string path)
         {
-            Leaf.PreLeaf = null;
-            Leaf.Path = "";
-            Leaf.PostLeaves = new List<Leaf> { };
+            Node lastExistPathNode = GetLastExistNodeInternal(path);
+            if (lastExistPathNode == null)
+                return;
+
+            if (!IsExistPathRoot(path))
+                Roots.Add(lastExistPathNode);
+
+            string[] dividedPaths = GetDividedPath(path);
+            for(int i = lastExistPathNode.Rank + 1; i < dividedPaths.Length; i++)
+            {
+                Node newNode = new Node(lastExistPathNode, dividedPaths[i], i);
+                lastExistPathNode.Children.Add(newNode);
+                lastExistPathNode = newNode;
+            }
         }
+
+        private Node GetLastExistNodeInternal(string path)
+        {
+            if (path == null || path == "")
+                return null;
+
+            List<Node> currentNodes = Roots;
+            string[] dividedPaths = GetDividedPath(path);
+            Node lastExistPathNode = new Node(null, dividedPaths[0], 0);
+
+            bool isExistNode = false;
+
+            foreach (string nodePath in dividedPaths)
+            {
+                foreach (Node node in currentNodes)
+                {
+                    if (nodePath == node.Path)
+                    {
+                        currentNodes = node.Children;
+                        lastExistPathNode = node;
+                        isExistNode = true;
+                        break;
+                    }
+                }
+
+                if (!isExistNode)
+                    return lastExistPathNode;
+                else
+                    isExistNode = false;
+            }
+
+            return null;
+        }
+
+        private bool IsExistPathRoot(string path)
+        {
+            if (path == null)
+                return false;
+
+            string rootPath = GetDividedPath(path)[0];
+            foreach(Node root in Roots)
+            {
+                if (root.Path == rootPath)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private string[] GetDividedPath(string path)
+        {
+            string[] result = path.Split('/');
+            result = result.Skip(1).ToArray();
+
+            return result; 
+        }
+
+
+
+
+
+
+
+
+
+
+
 
 
         // 아래 추가, 검색은 다른 클래스로? 잘라야하지아늘까
         // 가독성이 하늘나라로 떠나고 말았다
 
-        public void AddLeaf(string path)
+        /*public void AddLeaf(string path)
         {
             string[] addingPath = path.Split('/'); // { , member }
-            
+            Node lastLeaf = GetLastLeafOfBranch(path);
+            if (lastLeaf.Parent == null)
+
+
             if (isThereLeaf(path))
                 throw new Exception("Already Exist!");
-            else if (addingPath[addingPath.Length - 2] != GetLastLeafOfBranch(path).PreLeaf.Path)
+            else if (addingPath[addingPath.Length - 2] != GetLastLeafOfBranch(path).Parent.Path)
                 throw new Exception("There is no PreLeaf!");
             else
             {
-                Leaf valueLeaf = new Leaf(GetLastLeafOfBranch(path).PreLeaf, addingPath[addingPath.Length - 1]);
-                GetLastLeafOfBranch(path).PreLeaf.PostLeaves.Add(valueLeaf);
+                Node valueLeaf = new Node(GetLastLeafOfBranch(path).Parent, addingPath[addingPath.Length - 1]);
+                GetLastLeafOfBranch(path).Parent.Children.Add(valueLeaf);
             }
-            
+        }
+
+        public void DeleteLeaf(string path) // 삭제가 필요한가?
+        {
+            string deletingPath = path.Split('/')[path.Split('/').Length - 1];
+            if (isThereLeaf(path))
+            {
+                GetLastLeafOfBranch(path).Parent.Children.RemoveAt(
+                    GetLastLeafOfBranch(path).Parent.Children.FindIndex(p => p.Path == deletingPath)
+                );
+            }
+            else
+                throw new Exception("There is no Leaf that have path!");
+
         }
         
+
         public bool isThereLeaf(string path)
         {
             string[] pathArgs = path.Split('/');
-            Leaf leaf = this.Leaf;
+            Node leaf = this.Root;
             int TreeRankCount = 1;
 
             while (true) // 아ㅡ 무조건 무한반복 구데기죠?
@@ -64,10 +157,11 @@ namespace csWeb
             }
         }
         
-        public Leaf GetLastLeafOfBranch(string path)
+
+        public Node GetLastLeafOfBranch(string path)
         {
             string[] pathArgs = path.Split('/');
-            Leaf leaf = this.Leaf;
+            Node leaf = this.Root;
             int TreeRankCount = 1;
 
             while (true) // 아ㅡ 무조건 무한반복 구데기죠?
@@ -84,19 +178,20 @@ namespace csWeb
             }
         }
 
-        public Leaf GetPostLeaves(string path, Leaf leaf)
+        public Node GetPostLeaves(string path, Node leaf)
         {
-            if (leaf.PostLeaves.Capacity == 0)
+            if (leaf.Children.Capacity == 0)
                 return leaf;
 
-            Leaf retLeaf = new Leaf(); // 변수명 어려웡
-            retLeaf = leaf.PostLeaves.FirstOrDefault(p => p.Path == path);
+            Node retLeaf = new Node(); // 변수명 어려웡
+            retLeaf = leaf.Children.FirstOrDefault(p => p.Path == path);
 
             if (retLeaf == null)
                 return leaf;
             else
                 return retLeaf;
         }
+
         /**
         foreach (Leaf Postleaf in leaf.PostLeaves)
         {

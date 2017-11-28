@@ -11,20 +11,26 @@ namespace csWeb
     [Controller("/home")]
     class Ctrl
     {
-        private HttpListenerContext context;
+        private HttpListenerContext mContext;
+
+        public HttpListenerContext Context
+        {
+            get { return mContext; }
+            set { mContext = value; }
+        }
 
 
         public Ctrl(HttpListenerContext context)
         {
-            this.context = context;
+            this.mContext = context;
         }
 
 
-        [Route("/")]
+        //[Route("/")]
         [Route("/home")]
         public void Home()
         {
-            using (StreamWriter writer = new StreamWriter(context.Response.OutputStream))
+            using (StreamWriter writer = new StreamWriter(Context.Response.OutputStream))
                 writer.WriteAsync("This place is Home~");
         }
 
@@ -32,7 +38,7 @@ namespace csWeb
         [Route("/dashboard")]
         public void Dashboard()
         {
-            using (StreamWriter writer = new StreamWriter(context.Response.OutputStream))
+            using (StreamWriter writer = new StreamWriter(Context.Response.OutputStream))
                 writer.WriteAsync("Stop!");
         }
 
@@ -40,7 +46,7 @@ namespace csWeb
         [Route("/board")]
         public void Board(Dictionary<string, string> queries)
         {
-            using (StreamWriter writer = new StreamWriter(context.Response.OutputStream))
+            using (StreamWriter writer = new StreamWriter(Context.Response.OutputStream))
             {
                 foreach (KeyValuePair<string, string> kv in queries)
                 {
@@ -53,7 +59,7 @@ namespace csWeb
         [Route("/member/{id}")]
         public void Member(Dictionary<string, string> paths)
         {
-            using (StreamWriter writer = new StreamWriter(context.Response.OutputStream))
+            using (StreamWriter writer = new StreamWriter(Context.Response.OutputStream))
             {
                 foreach (KeyValuePair<string, string> kv in paths)
                 {
@@ -67,7 +73,7 @@ namespace csWeb
         [Route("/ErrorPage")]
         public void ErrorPage()
         {
-            using (StreamWriter writer = new StreamWriter(context.Response.OutputStream))
+            using (StreamWriter writer = new StreamWriter(Context.Response.OutputStream))
                 writer.WriteAsync("Freaking Error Man");
         }
 
