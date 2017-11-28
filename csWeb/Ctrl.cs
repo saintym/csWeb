@@ -18,9 +18,10 @@ namespace csWeb
             get { return mContext; }
             set { mContext = value; }
         }
+        
+        public Ctrl() { }
 
-
-        public Ctrl(HttpListenerContext context)
+        public void SetContext(HttpListenerContext context)
         {
             this.mContext = context;
         }

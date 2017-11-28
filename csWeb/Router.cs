@@ -21,6 +21,7 @@ namespace csWeb
         public Router()
         {
             mPathTree = new PathTree();
+            ctrl = new Ctrl();
         }
 
         public string url
@@ -74,7 +75,7 @@ namespace csWeb
             }
             else
                 routerParameter = null;
-            
+
             MethodInfo[] methodInfos = typeof(Ctrl).GetMethods();
             foreach (MethodInfo methodInfo in methodInfos)
             {
@@ -82,7 +83,7 @@ namespace csWeb
                 foreach (var attribute in routeAttributes)
                 {
                     RouteAttribute path = (RouteAttribute)attribute;
-                    if (path?.SubControllerPath == url)
+                    if (mPathTree.isExistPath(path.SubControllerPath)) // node 의 path 는 home 인데 subctrlPath 는 /home
                     {
                         methodInfo.Invoke(ctrl, routerParameter);
                         return;

@@ -31,10 +31,11 @@ namespace csWeb
         {
             Router router = new Router();
             router.AddController();
+            
+
             while (true)
             {
                 HttpListenerContext context = await mlistener.GetContextAsync();
-
                 router.ActivateController(context);
 
                 // using (StreamWriter writer = new StreamWriter(context.Response.OutputStream))
