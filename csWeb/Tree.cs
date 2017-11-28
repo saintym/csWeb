@@ -17,7 +17,7 @@ namespace csWeb
 
         public void Add(string path)
         {
-            Node lastExistPathNode = GetLastExistNode(path);
+            Node lastExistPathNode = GetLastExistNodeInternal(path);
             if (lastExistPathNode == null)
                 return;
 
@@ -33,7 +33,7 @@ namespace csWeb
             }
         }
 
-        private Node GetLastExistNode(string path)
+        private Node GetLastExistNodeInternal(string path)
         {
             if (path == null || path == "")
                 return null;
@@ -66,10 +66,9 @@ namespace csWeb
             return null;
         }
 
-        public Node GetPathNode(string path)
+        public bool isExistPathNode(string path)
         {
-            if (GetLastExistNode(path) == null)
-            {
+            /** Node 를 반환시키는 방식
                 List<Node> currentNodes = Roots;
                 string[] dividedPaths = GetDividedPathInternal(path);
                 Node lastExistPathNode = new Node(null, dividedPaths[0], 0);
@@ -94,9 +93,12 @@ namespace csWeb
                 }
 
                 return lastExistPathNode;
-            }
-            else
-                return null;
+            */
+            return GetLastExistNodeInternal(path) == null;
+        }
+
+        public void ActivateCtrl(Node node)
+        {
 
         }
 

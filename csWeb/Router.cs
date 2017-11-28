@@ -64,7 +64,7 @@ namespace csWeb
             Dictionary<string, string> queries = new Dictionary<string, string>();
             object[] routerParameter;
             string[] notSplitedURL = context.Request.RawUrl.Split('?');
-            this.url = notSplitedURL[0]; ////   page/34
+            this.url = notSplitedURL[0];
 
             
             if (notSplitedURL.Length > 1)
@@ -76,19 +76,11 @@ namespace csWeb
             else
                 routerParameter = null;
 
-            MethodInfo[] methodInfos = typeof(Ctrl).GetMethods();
-            foreach (MethodInfo methodInfo in methodInfos)
+
+            if (mPathTree.isExistPathNode(url))
             {
-                RouteAttribute[] routeAttributes = methodInfo.GetCustomAttributes<RouteAttribute>().ToArray();
-                foreach (var attribute in routeAttributes)
-                {
-                    RouteAttribute path = (RouteAttribute)attribute;
-                    if (mPathTree.GetPathNode(path.SubControllerPath).Path == mPathTree.GetPathNode(url)?.Path)
-                    {
-                        methodInfo.Invoke(ctrl, routerParameter);
-                        return;
-                    }
-                }
+                ActivateCtrlMethodInternal(url, routerParameter);
+                return;
             }
 
             ctrl.ErrorPage();
@@ -99,7 +91,26 @@ namespace csWeb
             */
         }
 
-        /*
+
+        private void ActivateCtrlMethodInternal(string path, object[] routerParameter)
+        {
+            MethodInfo[] methodInfos = typeof(Ctrl).GetMethods();
+            foreach (MethodInfo methodInfo in methodInfos)
+            {
+                RouteAttribute[] routeAttributes = methodInfo.GetCustomAttributes<RouteAttribute>().ToArray();
+                foreach (var attribute in routeAttributes)
+                {
+                    RouteAttribute routerPath = (RouteAttribute)attribute;
+                    if (routerPath.SubControllerPath == url)
+                    {
+                        methodInfo.Invoke(ctrl, routerParameter);
+                        return;
+                    }
+                }
+            }
+        }
+
+        /**
         public string[] Substring(string path)
         {
             string[] url_dict = new string[2];

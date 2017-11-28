@@ -25,9 +25,7 @@ namespace csWeb
         {
             this.mContext = context;
         }
-
-
-
+        
 
         [Route("/member/{id}")]
         public void Member(Dictionary<string, string> paths)
@@ -43,10 +41,10 @@ namespace csWeb
         }
 
         [Route("/member/dafuq")]
-        public void aashboard()
+        public void MemberDafuq()
         {
             using (StreamWriter writer = new StreamWriter(Context.Response.OutputStream))
-                writer.WriteAsync("Stop!!!!!");
+                writer.WriteAsync("Dafuq, man! haha!");
         }
 
 
