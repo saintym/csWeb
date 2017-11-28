@@ -15,7 +15,14 @@ namespace csWeb
         public string Path { get; }
         public List<Node> Children { get; set; }
         public int Rank { get; }
-        public Dictionary<string, int> dictionary { get; set; }
+        public Dictionary<string, string> dictionary { get; set; }
+        private Action<Dictionary<string, string>> mActMethod;
+
+        public Action<Dictionary<string, string>> ActMethod
+        {
+            get { return mActMethod; }
+            set { mActMethod = value;}
+        }
 
         public Node(Node parent, string path, int rank)
         {

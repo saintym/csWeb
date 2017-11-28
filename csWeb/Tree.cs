@@ -62,7 +62,6 @@ namespace csWeb
                     isExistNode = false;
             }
 
-
             return null;
         }
 
@@ -97,10 +96,54 @@ namespace csWeb
             return GetLastExistNodeInternal(path) == null;
         }
 
-        public void ActivateCtrl(Node node)
+        public Node GetPathNode(string path)
         {
+            List<Node> currentNodes = Roots;
+            string[] dividedPaths = GetDividedPathInternal(path);
+            Node lastExistPathNode = new Node(null, dividedPaths[0], 0);
+            bool isExistNode = false;
 
+            foreach (string nodePath in dividedPaths)
+            {
+                foreach (Node node in currentNodes)
+                {
+                    if (nodePath == node.Path)
+                    {
+                        currentNodes = node.Children;
+                        lastExistPathNode = node;
+                        isExistNode = true;
+                        break;
+                    }
+                }
+                if (!isExistNode)
+                    return null;
+                else
+                    isExistNode = false;
+            }
+
+            return lastExistPathNode;
         }
+
+        public Node GetDictionaryPathNode(string path) // /member/15
+        {
+            if (path == "/favicon.ico") // 이새끼 뭐임 ;;
+                return null;
+
+            Node idNode = GetLastExistNodeInternal(path);
+
+            if (idNode != null)
+            {
+                idNode = idNode.Children.Find(p => p.Path.Contains("{"));
+                idNode.dictionary = new Dictionary<string, string>();
+
+                idNode.dictionary.Add(idNode.Path, GetDividedPathInternal(path)[idNode.Rank]);
+
+                return idNode;
+            }
+            else
+                return null;
+        }
+
 
         public bool IsExistPathRoot(string path)
         {

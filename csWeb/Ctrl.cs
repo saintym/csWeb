@@ -27,7 +27,7 @@ namespace csWeb
         }
         
 
-        [Route("/member/{id}")]
+        [Route("/member/{member_id}")]
         public void Member(Dictionary<string, string> paths)
         {
             using (StreamWriter writer = new StreamWriter(Context.Response.OutputStream))

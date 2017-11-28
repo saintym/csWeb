@@ -54,6 +54,7 @@ namespace csWeb
                 {
                     RouteAttribute path = (RouteAttribute)attribute;
                     mPathTree.Add(path.SubControllerPath);
+                    mPathTree.GetPathNode(path.SubControllerPath).ActMethod = (dictionary) => methodInfo.Invoke(ctrl, new object[] { dictionary });
                 }
             }
         }
@@ -74,7 +75,7 @@ namespace csWeb
                 routerParameter = new object[] { queries };
             }
             else
-                routerParameter = null;
+                routerParameter = new object[] { };
 
 
             if (mPathTree.isExistPathNode(url))
@@ -82,7 +83,15 @@ namespace csWeb
                 ActivateCtrlMethodInternal(url, routerParameter);
                 return;
             }
-
+            
+            if (mPathTree.GetDictionaryPathNode(url) != null)
+            {
+                Node node = mPathTree.GetDictionaryPathNode(url);
+                Dictionary<string, string> dictionary = node.dictionary;
+                //routerParameter.SetValue(dictionary, routerParameter.Length);
+                node.ActMethod(dictionary);
+            }
+            
             ctrl.ErrorPage();
 
             /*
