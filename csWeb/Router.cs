@@ -83,7 +83,7 @@ namespace csWeb
                 foreach (var attribute in routeAttributes)
                 {
                     RouteAttribute path = (RouteAttribute)attribute;
-                    if (mPathTree.isExistPath(url)) // node 의 path 는 home 인데 subctrlPath 는 /home
+                    if (mPathTree.GetPathNode(path.SubControllerPath).Path == mPathTree.GetPathNode(url)?.Path)
                     {
                         methodInfo.Invoke(ctrl, routerParameter);
                         return;

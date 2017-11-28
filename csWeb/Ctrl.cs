@@ -27,6 +27,30 @@ namespace csWeb
         }
 
 
+
+
+        [Route("/member/{id}")]
+        public void Member(Dictionary<string, string> paths)
+        {
+            using (StreamWriter writer = new StreamWriter(Context.Response.OutputStream))
+            {
+                foreach (KeyValuePair<string, string> kv in paths)
+                {
+                    writer.WriteAsync($"Key : {kv.Key} , Value : {kv.Value}\n");
+                }
+                //writer.WriteAsync("Member, Huhh?");
+            }
+        }
+
+        [Route("/member/dafuq")]
+        public void aashboard()
+        {
+            using (StreamWriter writer = new StreamWriter(Context.Response.OutputStream))
+                writer.WriteAsync("Stop!!!!!");
+        }
+
+
+
         //[Route("/")]
         [Route("/home")]
         public void Home()
@@ -57,19 +81,6 @@ namespace csWeb
         }
 
 
-        [Route("/member/{id}")]
-        public void Member(Dictionary<string, string> paths)
-        {
-            using (StreamWriter writer = new StreamWriter(Context.Response.OutputStream))
-            {
-                foreach (KeyValuePair<string, string> kv in paths)
-                {
-                    writer.WriteAsync($"Key : {kv.Key} , Value : {kv.Value}\n");
-                }
-                //writer.WriteAsync("Member, Huhh?");
-            }
-        }
-        
 
         [Route("/ErrorPage")]
         public void ErrorPage()

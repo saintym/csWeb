@@ -25,7 +25,7 @@ namespace csWeb
                 Roots.Add(lastExistPathNode);
 
             string[] dividedPaths = GetDividedPathInternal(path);
-            for(int i = lastExistPathNode.Rank + 1; i < dividedPaths.Length; i++)
+            for (int i = lastExistPathNode.Rank + 1; i < dividedPaths.Length; i++)
             {
                 Node newNode = new Node(lastExistPathNode, dividedPaths[i], i);
                 lastExistPathNode.Children.Add(newNode);
@@ -33,7 +33,7 @@ namespace csWeb
             }
         }
 
-        public Node GetLastExistNode(string path)
+        private Node GetLastExistNode(string path)
         {
             if (path == null || path == "")
                 return null;
@@ -56,58 +56,57 @@ namespace csWeb
                         break;
                     }
                 }
-
                 if (!isExistNode)
                     return lastExistPathNode;
                 else
                     isExistNode = false;
             }
 
+
             return null;
         }
-        
-        public bool isExistPath(string path)
+
+        public Node GetPathNode(string path)
         {
-            List<Node> currentNodes = Roots;
-            string[] dividedPaths = GetDividedPathInternal(path);
-            Node lastExistPathNode = new Node(null, dividedPaths[0], 0);
-
-            bool isExistNode = false;
-
-            int treeCount = 0;
-            foreach (string nodePath in dividedPaths)
+            if (GetLastExistNode(path) == null)
             {
-                foreach (Node node in currentNodes)
+                List<Node> currentNodes = Roots;
+                string[] dividedPaths = GetDividedPathInternal(path);
+                Node lastExistPathNode = new Node(null, dividedPaths[0], 0);
+                bool isExistNode = false;
+
+                foreach (string nodePath in dividedPaths)
                 {
-                    if (nodePath == node.Path)
+                    foreach (Node node in currentNodes)
                     {
-                        currentNodes = node.Children;
-                        lastExistPathNode = node;
-                        isExistNode = true;
-                        treeCount++;
-                        break;
+                        if (nodePath == node.Path)
+                        {
+                            currentNodes = node.Children;
+                            lastExistPathNode = node;
+                            isExistNode = true;
+                            break;
+                        }
                     }
+                    if (!isExistNode)
+                        return null;
+                    else
+                        isExistNode = false;
                 }
 
-                if (isExistNode && treeCount == dividedPaths.Length)
-                    return true;
-                else if (!isExistNode)
-                    return false;
-                else
-                    isExistNode = false;
+                return lastExistPathNode;
             }
-
-            return false;
+            else
+                return null;
 
         }
-        
+
         public bool IsExistPathRoot(string path)
         {
             if (path == null)
                 return false;
 
             string rootPath = GetDividedPathInternal(path)[0];
-            foreach(Node root in Roots)
+            foreach (Node root in Roots)
             {
                 if (root.Path == rootPath)
                     return true;
@@ -121,7 +120,7 @@ namespace csWeb
             string[] result = path.Split('/');
             result = result.Skip(1).ToArray();
 
-            return result; 
+            return result;
         }
 
 

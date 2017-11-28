@@ -15,6 +15,7 @@ namespace csWeb
         public string Path { get; }
         public List<Node> Children { get; set; }
         public int Rank { get; }
+        public Dictionary<string, int> dictionary { get; set; }
 
         public Node(Node parent, string path, int rank)
         {
