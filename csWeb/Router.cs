@@ -54,7 +54,16 @@ namespace csWeb
                 {
                     RouteAttribute path = (RouteAttribute)attribute;
                     mPathTree.Add(path.SubControllerPath);
-                    mPathTree.GetPathNode(path.SubControllerPath).ActMethod = (dictionary) => methodInfo.Invoke(ctrl, new object[] { dictionary });
+                    mPathTree.GetPathNode(path.SubControllerPath).ActMethod = (dictionary) =>
+                    {
+                        List<Dictionary<string, string>> id = new List<Dictionary<string, string>>();
+                        ParameterInfo[] parameterInfos = methodInfo.GetParameters();
+                        /*foreach(var parameterInfo in parameterInfos)
+                        {
+                            parameterInfo.GetCustomAttribute<PathAttribute>().dictionary.
+                        }*/
+                        methodInfo.Invoke(ctrl, id.ToArray());
+                    };
                 }
             }
         }
@@ -67,7 +76,7 @@ namespace csWeb
             string[] notSplitedURL = context.Request.RawUrl.Split('?');
             this.url = notSplitedURL[0];
 
-            
+
             if (notSplitedURL.Length > 1)
             {
                 string query = notSplitedURL[1];
@@ -83,7 +92,7 @@ namespace csWeb
                 ActivateCtrlMethodInternal(url, routerParameter);
                 return;
             }
-            
+
             if (mPathTree.GetDictionaryPathNode(url) != null)
             {
                 Node node = mPathTree.GetDictionaryPathNode(url);
@@ -91,14 +100,15 @@ namespace csWeb
                 //routerParameter.SetValue(dictionary, routerParameter.Length);
                 node.ActMethod(dictionary);
             }
-            
-            ctrl.ErrorPage();
 
-            /*
-            var routeAttributes = controllerType.GetMethods().Select(info => info.GetCustomAttribute<RouteAttribute>());
-            var test = controllerType.GetMethods().Select(info => Tuple.Create(info, info.GetCustomAttributes<RouteAttribute>()));
-            */
+            ctrl.ErrorPage();
         }
+
+
+        /*
+        var routeAttributes = controllerType.GetMethods().Select(info => info.GetCustomAttribute<RouteAttribute>());
+        var test = controllerType.GetMethods().Select(info => Tuple.Create(info, info.GetCustomAttributes<RouteAttribute>()));
+        */
 
 
         private void ActivateCtrlMethodInternal(string path, object[] routerParameter)
@@ -147,7 +157,7 @@ namespace csWeb
             
         }
        */
-       
+
         private Dictionary<string, string> GetDictionaryKeyValue(string urlQuery)
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>();
@@ -174,6 +184,8 @@ namespace csWeb
 
             return controllerName;
         }
+
+
 
 
     }

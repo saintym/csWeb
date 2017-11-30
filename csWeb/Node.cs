@@ -24,6 +24,8 @@ namespace csWeb
             set { mActMethod = value;}
         }
 
+        public Node() { }
+
         public Node(Node parent, string path, int rank)
         {
             Parent = parent;

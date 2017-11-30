@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Node.cs" />
+    <Compile Include="PathAttribute.cs" />
     <Compile Include="Tree.cs" />
     <Compile Include="ControllerAttribute.cs" />
     <Compile Include="Controller\ErrorPage.cs" />

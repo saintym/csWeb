@@ -123,6 +123,7 @@ namespace csWeb
 
             return lastExistPathNode;
         }
+        
 
         public Node GetDictionaryPathNode(string path) // /member/15
         {
@@ -143,6 +144,49 @@ namespace csWeb
             else
                 return null;
         }
+
+        public Node GetPathNodeContainId(string url)
+        {
+            bool isExistIdNode = true;
+            string thePath = url;
+            Dictionary<string, string> Dic = new Dictionary<string, string>();
+
+            while (isExistIdNode)
+            {
+                Node node = new Node();
+                isExistIdNode = false;
+
+                if (this.GetDictionaryPathNode(thePath) != null)
+                {
+                    isExistIdNode = true;
+                    node = this.GetDictionaryPathNode(url);
+                    string key = node.dictionary.Single().Key;
+                    string value = node.dictionary.Single().Value;
+                    Dic.Add(key, value);
+
+                    if (node.Rank == url.Split('/').Length - 2) // node 가 마지막 path 일 시
+                    {
+                        node.dictionary = Dic;
+                        return node;
+                    }
+
+                    string recentIdNodePath = node.Path;
+                    thePath = thePath.Substring(thePath.IndexOf(recentIdNodePath) + 1);
+                }
+
+                if (this.isExistPathNode(thePath))
+                {
+                    node = this.GetPathNode(thePath);
+                    node.dictionary = Dic;
+                    return node;
+                }
+            }
+
+            return null;
+
+        }
+
+
 
 
         public bool IsExistPathRoot(string path)

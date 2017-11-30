@@ -28,17 +28,16 @@ namespace csWeb
         
 
         [Route("/member/{member_id}")]
-        public void Member(Dictionary<string, string> paths)
+        public void Member([Path("member_id")]string id)
         {
             using (StreamWriter writer = new StreamWriter(Context.Response.OutputStream))
             {
-                foreach (KeyValuePair<string, string> kv in paths)
-                {
+                
                     writer.WriteAsync($"Key : {kv.Key} , Value : {kv.Value}\n");
-                }
                 //writer.WriteAsync("Member, Huhh?");
             }
         }
+        
 
         [Route("/member/dafuq")]
         public void MemberDafuq()
