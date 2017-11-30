@@ -64,7 +64,7 @@ namespace csWeb
 
             return null;
         }
-
+        
         public bool isExistPathNode(string path)
         {
             /** Node 를 반환시키는 방식
@@ -124,7 +124,6 @@ namespace csWeb
             return lastExistPathNode;
         }
         
-
         public Node GetDictionaryPathNode(string path) // /member/15
         {
             if (path == "/favicon.ico") // 이새끼 뭐임 ;;
@@ -145,6 +144,26 @@ namespace csWeb
                 return null;
         }
 
+        /*public Node GetDictionaryPathNode(string path, List<Node> list) 
+        {
+            if (path == "/favicon.ico") // 이새끼 뭐임 ;;
+                return null;
+
+            Node idNode = GetLastExistNodeInternal(path, list);
+
+            if (idNode != null)
+            {
+                idNode = idNode.Children.Find(p => p.Path.Contains("{"));
+                idNode.dictionary = new Dictionary<string, string>();
+
+                idNode.dictionary.Add(idNode.Path, GetDividedPathInternal(path)[idNode.Rank]);
+
+                return idNode;
+            }
+            else
+                return null;
+        }*/
+
         public Node GetPathNodeContainId(string url)
         {
             bool isExistIdNode = true;
@@ -159,7 +178,7 @@ namespace csWeb
                 if (this.GetDictionaryPathNode(thePath) != null)
                 {
                     isExistIdNode = true;
-                    node = this.GetDictionaryPathNode(url);
+                    node = this.GetDictionaryPathNode(thePath);
                     string key = node.dictionary.Single().Key;
                     string value = node.dictionary.Single().Value;
                     Dic.Add(key, value);
@@ -170,8 +189,8 @@ namespace csWeb
                         return node;
                     }
 
-                    string recentIdNodePath = node.Path;
-                    thePath = thePath.Substring(thePath.IndexOf(recentIdNodePath) + 1);
+                    //string recentIdNodePath = node.Path;
+                    thePath = url.Replace(value, node.Path);
                 }
 
                 if (this.isExistPathNode(thePath))
@@ -185,9 +204,6 @@ namespace csWeb
             return null;
 
         }
-
-
-
 
         public bool IsExistPathRoot(string path)
         {

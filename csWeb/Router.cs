@@ -54,16 +54,19 @@ namespace csWeb
                 {
                     RouteAttribute path = (RouteAttribute)attribute;
                     mPathTree.Add(path.SubControllerPath);
-                    mPathTree.GetPathNode(path.SubControllerPath).ActMethod = (dictionary) =>
+                    mPathTree.GetPathNode(path.SubControllerPath).ActMethod =
+                        (dictionary) => methodInfo.Invoke(ctrl, new object[] { dictionary });
+                    /*
                     {
                         List<Dictionary<string, string>> id = new List<Dictionary<string, string>>();
                         ParameterInfo[] parameterInfos = methodInfo.GetParameters();
-                        /*foreach(var parameterInfo in parameterInfos)
+                        foreach(var parameterInfo in parameterInfos)
                         {
                             parameterInfo.GetCustomAttribute<PathAttribute>().dictionary.
-                        }*/
+                        }
                         methodInfo.Invoke(ctrl, id.ToArray());
                     };
+                    */
                 }
             }
         }
@@ -86,21 +89,20 @@ namespace csWeb
             else
                 routerParameter = new object[] { };
 
-
+            
             if (mPathTree.isExistPathNode(url))
             {
                 ActivateCtrlMethodInternal(url, routerParameter);
                 return;
             }
 
-            if (mPathTree.GetDictionaryPathNode(url) != null)
+            if (mPathTree.GetPathNodeContainId(url) != null)
             {
-                Node node = mPathTree.GetDictionaryPathNode(url);
+                Node node = mPathTree.GetPathNodeContainId(url);
                 Dictionary<string, string> dictionary = node.dictionary;
                 //routerParameter.SetValue(dictionary, routerParameter.Length);
                 node.ActMethod(dictionary);
             }
-
             ctrl.ErrorPage();
         }
 
