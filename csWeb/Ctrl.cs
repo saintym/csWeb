@@ -18,24 +18,21 @@ namespace csWeb
             get { return mContext; }
             set { mContext = value; }
         }
-        
+
         public Ctrl() { }
 
         public void SetContext(HttpListenerContext context)
         {
             this.mContext = context;
         }
-        
+
 
         [Route("/member/{member_id}/post/{post_id}")]
-        public void Member(Dictionary<string, string> queries)
+        public void Member([Path("{member_id}")] string memberID, [Path("{post_id}")] string postID)
         {
             using (StreamWriter writer = new StreamWriter(Context.Response.OutputStream))
             {
-                foreach (KeyValuePair<string, string> kv in queries)
-                {
-                    writer.WriteAsync($"Key : {kv.Key} , Value : {kv.Value}\n");
-                }
+                writer.WriteAsync($"Member ID is {memberID}, Post ID is {postID}");
             }
         }
         
@@ -65,7 +62,7 @@ namespace csWeb
                 writer.WriteAsync("Stop!");
         }
 
-
+        /*
         [Route("/board")]
         public void Board(Dictionary<string, string> queries)
         {
@@ -76,8 +73,8 @@ namespace csWeb
                     writer.WriteAsync($"Key : {kv.Key} , Value : {kv.Value}\n");
                 }
             }
-        }
-
+        }*/
+        
 
 
         [Route("/ErrorPage")]

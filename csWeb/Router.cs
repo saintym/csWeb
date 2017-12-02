@@ -42,6 +42,15 @@ namespace csWeb
             set { mControllerType = value; }
         }
 
+
+        private string[] GetDividedURLInternal(string path)
+        {
+            string[] result = path.Split('/');
+            result = result.Skip(1).ToArray();
+
+            return result;
+        }
+
         public void AddController()
         {
             //ctrl.Context = context;
@@ -54,21 +63,42 @@ namespace csWeb
                 {
                     RouteAttribute path = (RouteAttribute)attribute;
                     mPathTree.Add(path.SubControllerPath);
-                    mPathTree.GetPathNode(path.SubControllerPath).ActMethod =
-                        (dictionary) => methodInfo.Invoke(ctrl, new object[] { dictionary });
-                    /*
+
+                    string[] divdPath = GetDividedURLInternal(path.SubControllerPath);
+
+                    mPathTree.GetPathNode(path.SubControllerPath).ActMethod = (string url) =>
                     {
-                        List<Dictionary<string, string>> id = new List<Dictionary<string, string>>();
-                        ParameterInfo[] parameterInfos = methodInfo.GetParameters();
-                        foreach(var parameterInfo in parameterInfos)
+                        int indexListNum = 0;
+                        List<int> indexList = new List<int>();
+                        foreach (string PathSegment in divdPath)
                         {
-                            parameterInfo.GetCustomAttribute<PathAttribute>().dictionary.
+                            if (PathSegment.Contains("{"))
+                            {
+                                indexList.Add(indexListNum);
+                            }
+                            indexListNum++;
                         }
-                        methodInfo.Invoke(ctrl, id.ToArray());
+
+                        string[] divdURL = GetDividedURLInternal(url);
+                        ParameterInfo[] parameterInfos = methodInfo.GetParameters();
+                        List<string> valueList = new List<string>();
+                        int indexArrayNum = 0;
+                        List<Dictionary<string, string>> dicList = new List<Dictionary<string, string>>();
+                        foreach (var parameterInfo in parameterInfos)
+                        {
+                            string dicKey = parameterInfo.GetCustomAttribute<PathAttribute>().Key;
+                            Dictionary<string, string> paramDic = parameterInfo.GetCustomAttribute<PathAttribute>().dictionary;
+                            paramDic.Add(dicKey, divdURL[indexList.ToArray()[indexArrayNum++]]);
+                            dicList.Add(paramDic);
+                            valueList.Add(paramDic[dicKey]);
+                        }
+                        
+                        
+                        methodInfo.Invoke(ctrl, valueList.ToArray());
                     };
-                    */
                 }
             }
+            //(Dictionary) => methodInfo.Invoke(ctrl, Dictionary.Values.ToArray());
         }
 
         public void ActivateController(HttpListenerContext context)
@@ -89,7 +119,7 @@ namespace csWeb
             else
                 routerParameter = new object[] { };
 
-            
+
             if (mPathTree.isExistPathNode(url))
             {
                 ActivateCtrlMethodInternal(url, routerParameter);
@@ -99,10 +129,11 @@ namespace csWeb
             if (mPathTree.GetPathNodeContainId(url) != null)
             {
                 Node node = mPathTree.GetPathNodeContainId(url);
-                Dictionary<string, string> dictionary = node.dictionary;
-                //routerParameter.SetValue(dictionary, routerParameter.Length);
-                node.ActMethod(dictionary);
+                //Dictionary<string, string> dictionary = node.dictionary;
+                //List<string> list = new List<string>();
+                node.ActMethod(url);
             }
+
             ctrl.ErrorPage();
         }
 

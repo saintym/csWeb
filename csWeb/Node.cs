@@ -16,9 +16,9 @@ namespace csWeb
         public List<Node> Children { get; set; }
         public int Rank { get; }
         public Dictionary<string, string> dictionary { get; set; }
-        private Action<Dictionary<string, string>> mActMethod;
+        private Action<string> mActMethod;
 
-        public Action<Dictionary<string, string>> ActMethod
+        public Action<string> ActMethod
         {
             get { return mActMethod; }
             set { mActMethod = value;}

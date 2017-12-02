@@ -134,6 +134,9 @@ namespace csWeb
             if (idNode != null)
             {
                 idNode = idNode.Children.Find(p => p.Path.Contains("{"));
+                if (idNode == null)
+                    return null;
+
                 idNode.dictionary = new Dictionary<string, string>();
 
                 idNode.dictionary.Add(idNode.Path, GetDividedPathInternal(path)[idNode.Rank]);
@@ -189,7 +192,8 @@ namespace csWeb
                         return node;
                     }
 
-                    //string recentIdNodePath = node.Path;
+                    //int index = url.IndexOf(value);
+                    //thePath = url.Remove(index, 1).Insert(index, node.Path);
                     thePath = url.Replace(value, node.Path);
                 }
 
