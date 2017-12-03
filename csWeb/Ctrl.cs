@@ -9,7 +9,7 @@ using System.IO;
 namespace csWeb
 {
     [Controller("/home")]
-    class Ctrl
+    public class Ctrl
     {
         private HttpListenerContext mContext;
 

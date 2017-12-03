@@ -10,11 +10,11 @@ namespace csWeb
     {
         static void Main(string[] args)
         {
-            WebServer server = new WebServer("http://localhost:8000/");
-            server.Initialize();
+            Server server = new Server(new Router());
+            server.Create();
             try
             {
-                server.Run();
+                server.Start();
                 Console.WriteLine("서버 실행중 - - - Enter 누르면 종료");
                 Console.ReadLine();
             }

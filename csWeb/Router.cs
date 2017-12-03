@@ -10,18 +10,17 @@ using System.Reflection;
 
 namespace csWeb
 {
-    public class Router
+    public class Router : IRouter
     {
         private string mURL;
         private object mController;
         private Type mControllerType;
         private PathTree mPathTree;
-        private Ctrl ctrl;
+        private Ctrl mCtrl;
 
         public Router()
         {
             mPathTree = new PathTree();
-            ctrl = new Ctrl();
         }
 
         public string url
@@ -43,6 +42,91 @@ namespace csWeb
         }
 
 
+        public void Route(HttpListenerContext context, string url)
+        {
+            mCtrl.SetContext(context);
+            Dictionary<string, string> queries = new Dictionary<string, string>();
+            object[] routerParameter;
+            string[] notSplitedURL = url.Split('?');
+            this.url = notSplitedURL[0];
+
+
+            if (notSplitedURL.Length > 1)
+            {
+                string query = notSplitedURL[1];
+                queries = GetDictionaryKeyValue(query);
+                routerParameter = new object[] { queries };
+            }
+            else
+                routerParameter = new object[] { };
+
+
+            if (mPathTree.isExistPathNode(url))
+            {
+                ActivateCtrlInternal(url, routerParameter);
+                return;
+            }
+
+            if (mPathTree.GetPathNodeContainId(url) != null)
+            {
+                Node node = mPathTree.GetPathNodeContainId(url);
+                node.ActMethod(url);
+            }
+
+            mCtrl.ErrorPage();
+        }
+
+        public void RegisterController(Ctrl ctrl)
+        {
+            ctrl = new Ctrl();
+            mCtrl = ctrl;
+
+            MethodInfo[] methodInfos = typeof(Ctrl).GetMethods();
+            foreach (MethodInfo methodInfo in methodInfos)
+            {
+                RouteAttribute[] routeAttributes = methodInfo.GetCustomAttributes<RouteAttribute>().ToArray();
+                foreach (var attribute in routeAttributes)
+                {
+                    RouteAttribute path = (RouteAttribute)attribute;
+                    mPathTree.Add(path.SubControllerPath);
+
+                    string[] divdPath = GetDividedURLInternal(path.SubControllerPath);
+
+                    mPathTree.GetPathNode(path.SubControllerPath).ActMethod = (string url) =>
+                    {
+                        int indexListNum = 0;
+                        List<int> indexList = new List<int>();
+                        foreach (string PathSegment in divdPath)
+                        {
+                            if (PathSegment.Contains("{"))
+                            {
+                                indexList.Add(indexListNum);
+                            }
+                            indexListNum++;
+                        }
+
+                        string[] divdURL = GetDividedURLInternal(url);
+                        ParameterInfo[] parameterInfos = methodInfo.GetParameters();
+                        List<string> valueList = new List<string>();
+                        int indexArrayNum = 0;
+                        List<Dictionary<string, string>> dicList = new List<Dictionary<string, string>>();
+                        foreach (var parameterInfo in parameterInfos)
+                        {
+                            string dicKey = parameterInfo.GetCustomAttribute<PathAttribute>().Key;
+                            Dictionary<string, string> paramDic = parameterInfo.GetCustomAttribute<PathAttribute>().dictionary;
+                            paramDic.Add(dicKey, divdURL[indexList.ToArray()[indexArrayNum++]]);
+                            dicList.Add(paramDic);
+                            valueList.Add(paramDic[dicKey]);
+                        }
+
+
+                        methodInfo.Invoke(mCtrl, valueList.ToArray());
+                    };
+                }
+            }
+            //(Dictionary) => methodInfo.Invoke(ctrl, Dictionary.Values.ToArray());
+        }
+
         private string[] GetDividedURLInternal(string path)
         {
             string[] result = path.Split('/');
@@ -51,6 +135,7 @@ namespace csWeb
             return result;
         }
 
+        /*
         public void AddController()
         {
             //ctrl.Context = context;
@@ -100,13 +185,14 @@ namespace csWeb
             }
             //(Dictionary) => methodInfo.Invoke(ctrl, Dictionary.Values.ToArray());
         }
-
-        public void ActivateController(HttpListenerContext context)
+        */
+        /*
+        public void ActivateController(HttpListenerContext context, string url)
         {
             ctrl.Context = context;
             Dictionary<string, string> queries = new Dictionary<string, string>();
             object[] routerParameter;
-            string[] notSplitedURL = context.Request.RawUrl.Split('?');
+            string[] notSplitedURL = url.Split('?');
             this.url = notSplitedURL[0];
 
 
@@ -136,15 +222,14 @@ namespace csWeb
 
             ctrl.ErrorPage();
         }
-
+        */
 
         /*
         var routeAttributes = controllerType.GetMethods().Select(info => info.GetCustomAttribute<RouteAttribute>());
         var test = controllerType.GetMethods().Select(info => Tuple.Create(info, info.GetCustomAttributes<RouteAttribute>()));
         */
 
-
-        private void ActivateCtrlMethodInternal(string path, object[] routerParameter)
+        private void ActivateCtrlInternal(string path, object[] routerParameter)
         {
             MethodInfo[] methodInfos = typeof(Ctrl).GetMethods();
             foreach (MethodInfo methodInfo in methodInfos)
@@ -155,7 +240,7 @@ namespace csWeb
                     RouteAttribute routerPath = (RouteAttribute)attribute;
                     if (routerPath.SubControllerPath == url)
                     {
-                        methodInfo.Invoke(ctrl, routerParameter);
+                        methodInfo.Invoke(mCtrl, routerParameter);
                         return;
                     }
                 }
@@ -205,8 +290,6 @@ namespace csWeb
             return dictionary;
         }
 
-
-
         private string GetControllerNameInternal()
         {
             if (url == "/")
@@ -218,8 +301,6 @@ namespace csWeb
             return controllerName;
         }
 
-
-
-
     }
 }
+
