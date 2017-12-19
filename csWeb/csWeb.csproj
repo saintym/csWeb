@@ -45,6 +45,7 @@
     <Compile Include="IRouter.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="PathAttribute.cs" />
+    <Compile Include="QueryAttribute.cs" />
     <Compile Include="Tree.cs" />
     <Compile Include="ControllerAttribute.cs" />
     <Compile Include="Controller\ErrorPage.cs" />

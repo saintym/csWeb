@@ -44,8 +44,7 @@ namespace csWeb
                 writer.WriteAsync("Dafuq, man! haha!");
         }
 
-
-
+        
         //[Route("/")]
         [Route("/home")]
         public void Home()
@@ -62,18 +61,15 @@ namespace csWeb
                 writer.WriteAsync("Stop!");
         }
 
-        /*
+
         [Route("/board")]
-        public void Board(Dictionary<string, string> queries)
+        public void Board([Query("post")] string postID)
         {
             using (StreamWriter writer = new StreamWriter(Context.Response.OutputStream))
             {
-                foreach (KeyValuePair<string, string> kv in queries)
-                {
-                    writer.WriteAsync($"Key : {kv.Key} , Value : {kv.Value}\n");
-                }
+                writer.WriteAsync($"Query the PostID is {postID}");
             }
-        }*/
+        }
         
 
 

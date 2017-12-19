@@ -48,9 +48,8 @@ namespace csWeb
             Dictionary<string, string> queries = new Dictionary<string, string>();
             object[] routerParameter;
             string[] notSplitedURL = url.Split('?');
-            this.url = notSplitedURL[0];
-
-
+            string spliturl = notSplitedURL[0];
+            
             if (notSplitedURL.Length > 1)
             {
                 string query = notSplitedURL[1];
@@ -59,17 +58,17 @@ namespace csWeb
             }
             else
                 routerParameter = new object[] { };
-
-
-            if (mPathTree.isExistPathNode(url))
+                
+                
+            if (mPathTree.isExistPathNode(spliturl))
             {
-                ActivateCtrlInternal(url, routerParameter);
-                return;
+                Node node = mPathTree.GetPathNode(spliturl);
+                node.ActMethod(url);
             }
 
             if (mPathTree.GetPathNodeContainId(url) != null)
             {
-                Node node = mPathTree.GetPathNodeContainId(url);
+                Node node = mPathTree.GetPathNodeContainId(spliturl);
                 node.ActMethod(url);
             }
 
@@ -96,6 +95,8 @@ namespace csWeb
                     {
                         int indexListNum = 0;
                         List<int> indexList = new List<int>();
+                        Dictionary<string, string> QueryDic = new Dictionary<string, string>();
+                        string queries = null;
                         foreach (string PathSegment in divdPath)
                         {
                             if (PathSegment.Contains("{"))
@@ -105,26 +106,61 @@ namespace csWeb
                             indexListNum++;
                         }
 
+                        if (url.Contains("?"))
+                        {
+                            queries = url.Split('?')[1];
+                            url = url.Split('?')[0];
+                            QueryDic = DivideQueries(queries);
+                        }
+
+                        
+
                         string[] divdURL = GetDividedURLInternal(url);
                         ParameterInfo[] parameterInfos = methodInfo.GetParameters();
                         List<string> valueList = new List<string>();
+
+
                         int indexArrayNum = 0;
-                        List<Dictionary<string, string>> dicList = new List<Dictionary<string, string>>();
                         foreach (var parameterInfo in parameterInfos)
                         {
-                            string dicKey = parameterInfo.GetCustomAttribute<PathAttribute>().Key;
-                            Dictionary<string, string> paramDic = parameterInfo.GetCustomAttribute<PathAttribute>().dictionary;
-                            paramDic.Add(dicKey, divdURL[indexList.ToArray()[indexArrayNum++]]);
-                            dicList.Add(paramDic);
-                            valueList.Add(paramDic[dicKey]);
+                            //object attr = parameterInfo.GetCustomAttribute<PathAttribute>() ?? parameterInfo.GetCustomAttribute<QueryAttribute>();
+                            if (parameterInfo.GetCustomAttribute<PathAttribute>() != null)
+                            {
+                                string dicKey = parameterInfo.GetCustomAttribute<PathAttribute>().Key;
+                                Dictionary<string, string> paramDic = parameterInfo.GetCustomAttribute<PathAttribute>().dictionary;
+                                paramDic.Add(dicKey, divdURL[indexList.ToArray()[indexArrayNum++]]);
+                                valueList.Add(paramDic[dicKey]);
+                            }
+                            else if(parameterInfo.GetCustomAttribute<QueryAttribute>() != null)
+                            {
+                                string dicKey = parameterInfo.GetCustomAttribute<QueryAttribute>().Key;
+                                Dictionary<string, string> paramDic = parameterInfo.GetCustomAttribute<QueryAttribute>().dictionary;
+                                foreach (string key in QueryDic.Keys)
+                                {
+                                    if(dicKey == key)
+                                        paramDic.Add(dicKey, QueryDic[key]);
+                                }
+                                valueList.Add(paramDic[dicKey]);
+                            }
                         }
-
 
                         methodInfo.Invoke(mCtrl, valueList.ToArray());
                     };
                 }
             }
-            //(Dictionary) => methodInfo.Invoke(ctrl, Dictionary.Values.ToArray());
+            
+        }
+
+        private Dictionary<string, string> DivideQueries(string url)
+        {
+            string[] divdurl = url.Split('&');
+            Dictionary<string, string> DividedQueries = new Dictionary<string, string>();
+            foreach (string divdurlSegm in divdurl)
+            {
+                string[] KeyValue = divdurlSegm.Split('=');
+                DividedQueries.Add(KeyValue[0], KeyValue[1]);
+            }
+            return DividedQueries;
         }
 
         private string[] GetDividedURLInternal(string path)
@@ -134,101 +170,7 @@ namespace csWeb
 
             return result;
         }
-
-        /*
-        public void AddController()
-        {
-            //ctrl.Context = context;
-
-            MethodInfo[] methodInfos = typeof(Ctrl).GetMethods();
-            foreach (MethodInfo methodInfo in methodInfos)
-            {
-                RouteAttribute[] routeAttributes = methodInfo.GetCustomAttributes<RouteAttribute>().ToArray();
-                foreach (var attribute in routeAttributes)
-                {
-                    RouteAttribute path = (RouteAttribute)attribute;
-                    mPathTree.Add(path.SubControllerPath);
-
-                    string[] divdPath = GetDividedURLInternal(path.SubControllerPath);
-
-                    mPathTree.GetPathNode(path.SubControllerPath).ActMethod = (string url) =>
-                    {
-                        int indexListNum = 0;
-                        List<int> indexList = new List<int>();
-                        foreach (string PathSegment in divdPath)
-                        {
-                            if (PathSegment.Contains("{"))
-                            {
-                                indexList.Add(indexListNum);
-                            }
-                            indexListNum++;
-                        }
-
-                        string[] divdURL = GetDividedURLInternal(url);
-                        ParameterInfo[] parameterInfos = methodInfo.GetParameters();
-                        List<string> valueList = new List<string>();
-                        int indexArrayNum = 0;
-                        List<Dictionary<string, string>> dicList = new List<Dictionary<string, string>>();
-                        foreach (var parameterInfo in parameterInfos)
-                        {
-                            string dicKey = parameterInfo.GetCustomAttribute<PathAttribute>().Key;
-                            Dictionary<string, string> paramDic = parameterInfo.GetCustomAttribute<PathAttribute>().dictionary;
-                            paramDic.Add(dicKey, divdURL[indexList.ToArray()[indexArrayNum++]]);
-                            dicList.Add(paramDic);
-                            valueList.Add(paramDic[dicKey]);
-                        }
-                        
-                        
-                        methodInfo.Invoke(ctrl, valueList.ToArray());
-                    };
-                }
-            }
-            //(Dictionary) => methodInfo.Invoke(ctrl, Dictionary.Values.ToArray());
-        }
-        */
-        /*
-        public void ActivateController(HttpListenerContext context, string url)
-        {
-            ctrl.Context = context;
-            Dictionary<string, string> queries = new Dictionary<string, string>();
-            object[] routerParameter;
-            string[] notSplitedURL = url.Split('?');
-            this.url = notSplitedURL[0];
-
-
-            if (notSplitedURL.Length > 1)
-            {
-                string query = notSplitedURL[1];
-                queries = GetDictionaryKeyValue(query);
-                routerParameter = new object[] { queries };
-            }
-            else
-                routerParameter = new object[] { };
-
-
-            if (mPathTree.isExistPathNode(url))
-            {
-                ActivateCtrlMethodInternal(url, routerParameter);
-                return;
-            }
-
-            if (mPathTree.GetPathNodeContainId(url) != null)
-            {
-                Node node = mPathTree.GetPathNodeContainId(url);
-                //Dictionary<string, string> dictionary = node.dictionary;
-                //List<string> list = new List<string>();
-                node.ActMethod(url);
-            }
-
-            ctrl.ErrorPage();
-        }
-        */
-
-        /*
-        var routeAttributes = controllerType.GetMethods().Select(info => info.GetCustomAttribute<RouteAttribute>());
-        var test = controllerType.GetMethods().Select(info => Tuple.Create(info, info.GetCustomAttributes<RouteAttribute>()));
-        */
-
+        
         private void ActivateCtrlInternal(string path, object[] routerParameter)
         {
             MethodInfo[] methodInfos = typeof(Ctrl).GetMethods();
@@ -246,36 +188,7 @@ namespace csWeb
                 }
             }
         }
-
-        /**
-        public string[] Substring(string path)
-        {
-            string[] url_dict = new string[2];
-
-            if (path == "")
-            {
-                url_dict[0] = "/home";
-                url_dict[1] = null;
-                return url_dict;
-            }
-
-            int queryPosition = path.IndexOf('?');
-            if(queryPosition == -1)
-            {
-                url_dict[0] = path;
-                url_dict[1] = null;
-                return url_dict;
-            }
-            else
-            {
-                url_dict[0] = path.Substring(0, queryPosition-1);
-                url_dict[1] = path.Substring(queryPosition + 1);
-                return url_dict;
-            }
-            
-        }
-       */
-
+        
         private Dictionary<string, string> GetDictionaryKeyValue(string urlQuery)
         {
             Dictionary<string, string> dictionary = new Dictionary<string, string>();
